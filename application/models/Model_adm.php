@@ -7,6 +7,14 @@ class model_adm extends CI_Model
 		$query = $this->db->get('registrasi');
 		return $query;
 	}
+
+	public function get_postingan()
+	{
+		# code...
+		$query = $this->db->get('post_information');
+		return $query;
+	}
+
 	public function insert_registrasi($user, $email, $password, $no_telp, $gender, $umur)
 	{
 		# code...
@@ -22,6 +30,19 @@ class model_adm extends CI_Model
 		];
 		$this->db->insert('registrasi', $data);
 	}
+
+	public function insert_postingan($judul_post, $isi_post, $status_post, $foto)
+	{
+		# code...
+		$data = [
+			'judul_post' => $judul_post,
+			'isi_post' => $isi_post,
+			'status_post' => $status_post,
+			'foto' => $foto
+		];
+		$this->db->insert('post_information', $data);
+	}
+
 	public function cek_email($email, $password)
 	{
 		# code...
@@ -38,7 +59,7 @@ class model_adm extends CI_Model
 				$this->session->set_userdata($data);
 
 				if ($registrasi['role_id'] == 2) {
-					redirect(base_url('index.php/Kariyawan_ctrl/upload_cv'));
+					redirect(base_url('index.php/Kariyawan_ctrl/main_page'));
 				} elseif ($registrasi['role_id'] == 1) {
 					redirect(base_url('index.php/Welcome/dashboard'));
 				} else {

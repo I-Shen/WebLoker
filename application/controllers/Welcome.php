@@ -35,8 +35,14 @@ class Welcome extends CI_Controller
 		]);
 		if ($this->session->userdata('email') && $this->session->userdata('role_id')) {
 			# code...
-			// $this->dashboard();
-			redirect(base_url('index.php/Welcome/dashboard'));
+			$role_id = $this->session->userdata('role_id');
+			if ($role_id == 1) {
+				# code...
+				redirect(base_url('index.php/Welcome/dashboard'));
+			} elseif ($role_id == 2) {
+				# code...
+				redirect(base_url('index.php/Kariyawan_ctrl/main_page'));
+			}
 		} elseif ($this->form_validation->run() == FALSE) {
 			# code...
 			$this->load->view('templates/Header_LG');
@@ -57,11 +63,25 @@ class Welcome extends CI_Controller
 	public function dashboard()
 	{
 		$data['registrasi'] = $this->db->get_where('registrasi', ['email' => $this->session->userdata('email')])->row_array();
-		if ($this->session->userdata('email') && $this->session->userdata('role_id')) {
+		if ($this->session->userdata('email') && $this->session->userdata('role_id') == 1) {
 			# code...
 			$this->load->view('templates/Header');
 			$this->load->view('sidebar/Sidebar');
 			$this->load->view('Dashboard_body');
+			$this->load->view('templates/Footer');
+		} else {
+			# code...
+			redirect(base_url('index.php/Welcome'));
+		}
+	}
+	public function create_post()
+	{
+		$data['registrasi'] = $this->db->get_where('registrasi', ['email' => $this->session->userdata('email')])->row_array();
+		if ($this->session->userdata('email') && $this->session->userdata('role_id') == 1) {
+			# code...
+			$this->load->view('templates/Header');
+			$this->load->view('sidebar/Sidebar');
+			$this->load->view('Create_post_body');
 			$this->load->view('templates/Footer');
 		} else {
 			# code...
@@ -107,10 +127,8 @@ class Welcome extends CI_Controller
 			redirect(base_url('index.php/Welcome'));
 		}
 	}
-	private function login()
+	public function login()
 	{
-		# code...
-
 		$email = $this->input->post('email');
 		$password = $this->input->post('password');
 		$this->model_adm->cek_email($email, $password);
@@ -121,5 +139,39 @@ class Welcome extends CI_Controller
 		$this->session->unset_userdata('email');
 		$this->session->unset_userdata('role_id');
 		redirect(base_url('index.php/Welcome'));
+	}
+	public function input_post()
+	{
+		# code...
+		// $data['registrasi'] = $this->db->get_where('registrasi', ['email' => $this->session->userdata('email')])->row_array();
+		// $email = $this->session->userdata('email');
+		// $role_id = $this->session->userdata('role_id');
+		$this->form_validation->set_rules('judul', 'Judul', 'required');
+		$this->form_validation->set_rules('isi', 'Isi', 'required');
+		$this->form_validation->set_rules('status', 'Status', 'required');
+		$data['foto'] = '';
+		$foto = $_FILES['gambar']['name'];
+		$config['upload_path'] = './asset/image';
+		$config['allowed_types'] = 'jpg|png|jpeg';
+		$this->load->library('upload', $config);
+		if (!$this->upload->do_upload('gambar') || $this->form_validation->run() == false) {
+			# code...
+			echo "upload gagal";
+		} else {
+			# code...
+			$judul_post = $this->input->post('judul');
+			$isi_post = $this->input->post('isi');
+			$status_post = $this->input->post('status');
+			$foto = $this->upload->data('file_name');
+			// $data = [
+			// 	'judul_post' => $judul_post,
+			// 	'isi_post' => $isi_post,
+			// 	'status_post' => $status_post,
+			// 	'foto' => $foto
+			// ];
+		}
+		// $this->db->insert('post_information', $data);
+		$this->model_adm->insert_postingan($judul_post, $isi_post, $status_post, $foto);
+		redirect(base_url('index.php/Welcome/create_post'));
 	}
 }
